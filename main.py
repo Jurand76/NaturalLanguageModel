@@ -41,7 +41,35 @@ eval_data = [
     {"input": "Pokaż ile samochodów wyprodukowano w 2015 roku?",
      "output": "SELECT COUNT(*) FROM cars WHERE year = 2015;"},
     {"input": "Pokaż wszystkie samochody marki Toyota.",
-     "output": "SELECT * FROM cars WHERE make = 'Toyota';"}
+     "output": "SELECT * FROM cars WHERE make = 'Toyota';"},
+    {"input": "Pokaż wszystkie samochody wyprodukowane po 2015 roku.",
+     "output": "SELECT * FROM cars WHERE year > 2015;"},
+    {"input": "Pokaż wszystkie samochody wyprodukowane po 2016 roku.",
+     "output": "SELECT * FROM cars WHERE year > 2016;"},
+    {"input": "Pokaż wszystkie samochody wyprodukowane po 2018 roku.",
+     "output": "SELECT * FROM cars WHERE year > 2018;"},
+    {"input": "Pokaż samochody marki Ford.",
+     "output": "SELECT * FROM cars WHERE make = 'Ford';"},
+    {"input": "Pokaż samochody marki Opel.",
+     "output": "SELECT * FROM cars WHERE make = 'Opel';"},
+    {"input": "Pokaż samochody marki Audi.",
+     "output": "SELECT * FROM cars WHERE make = 'Audi';"},
+    {"input": "Pokaż ile samochodów wyprodukowano w 2020 roku?",
+     "output": "SELECT COUNT(*) FROM cars WHERE year = 2020;"},
+    {"input": "Pokaż ile samochodów wyprodukowano w 2010 roku?",
+     "output": "SELECT COUNT(*) FROM cars WHERE year = 2010;"},
+    {"input": "Pokaż ile samochodów wyprodukowano w 2015 roku?",
+     "output": "SELECT COUNT(*) FROM cars WHERE year = 2015;"},
+    {"input": "Wymień wszystkie modele samochodów marki Ford.",
+     "output": "SELECT model FROM cars WHERE make = 'Ford';"},
+    {"input": "Ile samochodów wyprodukowano w 2020 roku?",
+     "output": "SELECT COUNT(*) FROM cars WHERE year = 2020;"},
+    {"input": "Pokaż wszystkie samochody o cenie mniejszej niż 20 000.",
+     "output": "SELECT * FROM cars WHERE price < 20000;"},
+    {"input": "Wyświetl wszystkie marki samochodów, które są czerwone.",
+     "output": "SELECT make FROM cars WHERE color = 'red';"},
+    {"input": "Pokaż wszystkie samochody z rokiem produkcji pomiędzy 2010 a 2015.",
+     "output": "SELECT * FROM cars WHERE year BETWEEN 2010 AND 2015;"}
 ]
 
 
@@ -62,13 +90,13 @@ def preprocess_function(examples):
     model_inputs = tokenizer(
         examples["input"],
         max_length=512,
-        padding="max_length",
+        padding=True,
         truncation=True
     )
     labels = tokenizer(
         examples["output"],
         max_length=512,
-        padding="max_length",
+        padding=True,
         truncation=True
     )
     model_inputs["labels"] = labels["input_ids"]
@@ -96,8 +124,8 @@ training_args = TrainingArguments(
     output_dir="./results",
     eval_strategy="epoch",  # Poprawiony parametr
     learning_rate=5e-5,
-    per_device_train_batch_size=16,
-    per_device_eval_batch_size=16,
+    per_device_train_batch_size=4,
+    per_device_eval_batch_size=4,
     num_train_epochs=5,
     weight_decay=0.01,
     logging_dir="./logs",

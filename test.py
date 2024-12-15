@@ -11,15 +11,15 @@ def translate_nlp_to_sql(input_text):
     inputs = tokenizer(
         input_text,
         return_tensors="pt",  # Batch w formacie PyTorch
-        max_length=512,
+        max_length=128,
         truncation=True,
-        padding="max_length"
+        padding=True
     )
 
     # Generowanie wyniku przez model
     output_ids = model.generate(
         inputs["input_ids"],
-        max_length=512,
+        max_length=128,
         num_beams=4,  # Używamy beam search dla dokładniejszego wyniku
         early_stopping=True
     )
