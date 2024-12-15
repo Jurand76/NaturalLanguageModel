@@ -1,16 +1,44 @@
 from transformers import T5Tokenizer, T5ForConditionalGeneration, Trainer, TrainingArguments, DataCollatorForSeq2Seq
 from datasets import Dataset
+from multiprocessing import freeze_support
+
+import os
+os.environ["HF_HUB_DISABLE_SYMLINKS"] = "1"
 
 # Dane treningowe i walidacyjne
 train_data = [
     {"input": "Pokaż wszystkie samochody wyprodukowane po 2015 roku.",
      "output": "SELECT * FROM cars WHERE year > 2015;"},
-    {"input": "Wymień marki i modele samochodów z rokiem 2020.",
-     "output": "SELECT make, model FROM cars WHERE year = 2020;"}
+    {"input": "Pokaż wszystkie samochody wyprodukowane po 2016 roku.",
+     "output": "SELECT * FROM cars WHERE year > 2016;"},
+    {"input": "Pokaż wszystkie samochody wyprodukowane po 2018 roku.",
+     "output": "SELECT * FROM cars WHERE year > 2018;"},
+    {"input": "Pokaż samochody marki Ford.",
+     "output": "SELECT * FROM cars WHERE make = 'Ford';"},
+    {"input": "Pokaż samochody marki Opel.",
+     "output": "SELECT * FROM cars WHERE make = 'Opel';"},
+    {"input": "Pokaż samochody marki Audi.",
+     "output": "SELECT * FROM cars WHERE make = 'Audi';"},
+    {"input": "Pokaż ile samochodów wyprodukowano w 2020 roku?",
+     "output": "SELECT COUNT(*) FROM cars WHERE year = 2020;"},
+    {"input": "Pokaż ile samochodów wyprodukowano w 2010 roku?",
+     "output": "SELECT COUNT(*) FROM cars WHERE year = 2010;"},
+    {"input": "Pokaż ile samochodów wyprodukowano w 2015 roku?",
+     "output": "SELECT COUNT(*) FROM cars WHERE year = 2015;"},
+    {"input": "Wymień wszystkie modele samochodów marki Ford.",
+     "output": "SELECT model FROM cars WHERE make = 'Ford';"},
+    {"input": "Ile samochodów wyprodukowano w 2020 roku?",
+     "output": "SELECT COUNT(*) FROM cars WHERE year = 2020;"},
+    {"input": "Pokaż wszystkie samochody o cenie mniejszej niż 20 000.",
+     "output": "SELECT * FROM cars WHERE price < 20000;"},
+    {"input": "Wyświetl wszystkie marki samochodów, które są czerwone.",
+     "output": "SELECT make FROM cars WHERE color = 'red';"},
+    {"input": "Pokaż wszystkie samochody z rokiem produkcji pomiędzy 2010 a 2015.",
+     "output": "SELECT * FROM cars WHERE year BETWEEN 2010 AND 2015;"}
 ]
 
 eval_data = [
-    {"input": "Ile samochodów wyprodukowano w 2015 roku?",
+    {"input": "Pokaż ile samochodów wyprodukowano w 2015 roku?",
      "output": "SELECT COUNT(*) FROM cars WHERE year = 2015;"},
     {"input": "Pokaż wszystkie samochody marki Toyota.",
      "output": "SELECT * FROM cars WHERE make = 'Toyota';"}
@@ -18,12 +46,16 @@ eval_data = [
 
 
 # Utwórz Dataset
+print("Tworzenie datasetu")
 train_dataset = Dataset.from_list(train_data)
 eval_dataset = Dataset.from_list(eval_data)
+print()
 
 # Tokenizer i model
+print("Tworzenie tokenizera i wzorca modelu")
 tokenizer = T5Tokenizer.from_pretrained("t5-small", legacy=False)
 model = T5ForConditionalGeneration.from_pretrained("t5-small")
+print()
 
 # Funkcja przetwarzania danych
 def preprocess_function(examples):
@@ -56,13 +88,17 @@ eval_dataset = eval_dataset.map(preprocess_function, batched=False, remove_colum
 print(eval_dataset[0])
 print()
 
+
+
 # Argumenty treningowe
 training_args = TrainingArguments(
+    dataloader_num_workers = 0,
     output_dir="./results",
     eval_strategy="epoch",  # Poprawiony parametr
     learning_rate=5e-5,
-    per_device_train_batch_size=8,
-    num_train_epochs=3,
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=16,
+    num_train_epochs=5,
     weight_decay=0.01,
     logging_dir="./logs",
     remove_unused_columns=False
@@ -88,3 +124,11 @@ trainer = Trainer(
 print("Trening modelu")
 trainer.train()
 print("Trening zakończony")
+
+# Zapisanie modelu
+
+trainer.save_model("./results")
+
+
+
+    
