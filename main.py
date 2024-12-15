@@ -4,6 +4,8 @@ from multiprocessing import freeze_support
 
 import os
 os.environ["HF_HUB_DISABLE_SYMLINKS"] = "1"
+if not os.path.exists("./logs"):
+    os.makedirs("./logs")
 
 # Dane treningowe i walidacyjne
 train_data = [
@@ -89,13 +91,13 @@ print()
 def preprocess_function(examples):
     model_inputs = tokenizer(
         examples["input"],
-        max_length=512,
+        max_length=128,
         padding=True,
         truncation=True
     )
     labels = tokenizer(
         examples["output"],
-        max_length=512,
+        max_length=128,
         padding=True,
         truncation=True
     )
@@ -123,12 +125,13 @@ training_args = TrainingArguments(
     dataloader_num_workers = 0,
     output_dir="./results",
     eval_strategy="epoch",  # Poprawiony parametr
-    learning_rate=5e-5,
-    per_device_train_batch_size=4,
-    per_device_eval_batch_size=4,
-    num_train_epochs=5,
+    logging_dir="./logs",  # Ścieżka do logów TensorBoard
+    logging_steps=10,      # Jak często zapisywać logi (np. co 10 kroków)
+    learning_rate=1e-5,
+    per_device_train_batch_size=16,
+    per_device_eval_batch_size=16,
+    num_train_epochs=10,
     weight_decay=0.01,
-    logging_dir="./logs",
     remove_unused_columns=False
 )
 
@@ -145,7 +148,7 @@ trainer = Trainer(
     args=training_args,
     train_dataset=train_dataset,
     eval_dataset=eval_dataset,
-    data_collator=data_collator
+    data_collator=data_collator,
 )
 
 # Trening modelu
