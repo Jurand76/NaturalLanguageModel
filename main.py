@@ -55,8 +55,10 @@ def preprocess_function(examples):
     return model_inputs
 
 # Przetwórz dane
-print("Przetwarzanie train dataset")
+
 columns_to_remove = ["input", "output"]   # usuwanie kolumn input i output z datasetu
+
+print("Przetwarzanie train dataset")
 train_dataset = train_dataset.map(preprocess_function, batched=False, remove_columns=columns_to_remove)
 print(train_dataset[0])
 
@@ -93,4 +95,6 @@ trainer = Trainer(
 )
 
 # Trening modelu
+print("Trening modelu")
 trainer.train()
+print("Trening zakończony")
