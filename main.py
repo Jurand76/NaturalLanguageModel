@@ -3,31 +3,19 @@ from datasets import Dataset
 
 # Dane treningowe i walidacyjne
 train_data = [
-    {"input": ["Pokaż", "wszystkie", "samochody", "wyprodukowane", "po", "2015", "roku."],
-     "output": ["SELECT", "*", "FROM", "cars", "WHERE", "year", ">", "2015;"]},
-    {"input": ["Wymień", "marki", "i", "modele", "samochodów", "z", "rokiem", "2020."],
-     "output": ["SELECT", "make,", "model", "FROM", "cars", "WHERE", "year", "=", "2020;"]}
+    {"input": "Pokaż wszystkie samochody wyprodukowane po 2015 roku.",
+     "output": "SELECT * FROM cars WHERE year > 2015;"},
+    {"input": "Wymień marki i modele samochodów z rokiem 2020.",
+     "output": "SELECT make, model FROM cars WHERE year = 2020;"}
 ]
 
 eval_data = [
-    {"input": ["Ile", "samochodów", "wyprodukowano", "w", "2015", "roku?"],
-     "output": ["SELECT", "COUNT(*)", "FROM", "cars", "WHERE", "year", "=", "2015;"]},
-    {"input": ["Pokaż", "wszystkie", "samochody", "marki", "Toyota."],
-     "output": ["SELECT", "*", "FROM", "cars", "WHERE", "make", "=", "'Toyota';"]}
+    {"input": "Ile samochodów wyprodukowano w 2015 roku?",
+     "output": "SELECT COUNT(*) FROM cars WHERE year = 2015;"},
+    {"input": "Pokaż wszystkie samochody marki Toyota.",
+     "output": "SELECT * FROM cars WHERE make = 'Toyota';"}
 ]
 
-# Napraw dane wejściowe
-def fix_input_output(data):
-    for example in data:
-        example["input"] = " ".join(example["input"]) if isinstance(example["input"], list) else example["input"]
-        example["output"] = " ".join(example["output"]) if isinstance(example["output"], list) else example["output"]
-    return data
-
-train_data = fix_input_output(train_data)
-eval_data = fix_input_output(eval_data)
-
-print("Train data")
-print(train_data)
 
 # Utwórz Dataset
 train_dataset = Dataset.from_list(train_data)
@@ -61,10 +49,12 @@ columns_to_remove = ["input", "output"]   # usuwanie kolumn input i output z dat
 print("Przetwarzanie train dataset")
 train_dataset = train_dataset.map(preprocess_function, batched=False, remove_columns=columns_to_remove)
 print(train_dataset[0])
+print()
 
 print("Przetwarzanie eval dataset")
 eval_dataset = eval_dataset.map(preprocess_function, batched=False, remove_columns=columns_to_remove)
 print(eval_dataset[0])
+print()
 
 # Argumenty treningowe
 training_args = TrainingArguments(
